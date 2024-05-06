@@ -35,7 +35,7 @@
           icon="el-icon-plus"
           size="mini"
           @click="handleAdd"
-          v-hasPermi="['system:role:add']"
+          v-hasPermi="['fozu:fozu:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -46,7 +46,7 @@
           size="mini"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['system:role:edit']"
+          v-hasPermi="['fozu:fozu:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -57,7 +57,7 @@
           size="mini"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['system:role:remove']"
+          v-hasPermi="['fozu:fozu:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -67,7 +67,7 @@
           icon="el-icon-download"
           size="mini"
           @click="handleExport"
-          v-hasPermi="['system:role:export']"
+          v-hasPermi="['fozu:fozu:export']"
         >导出</el-button>
       </el-col> -->
       <el-col :span="1.5">
@@ -88,7 +88,7 @@
           size="mini"
           :disabled="single"
           @click="handleUpdateFile"
-          v-hasPermi="['system:role:edit']"
+          v-hasPermi="['fozu:fozu:edit']"
         >修改</el-button>
       </el-col> -->
       <el-col :span="1.5">
@@ -99,7 +99,7 @@
           size="mini"
           :disabled="multiple"
           @click="handleDeleteFile"
-          v-hasPermi="['system:role:remove']"
+          v-hasPermi="['fozu:fozu:remove']"
         >删除</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
@@ -113,11 +113,13 @@
           <el-image 
             style="width: 50px; height: 50px"
             :src="scope.row.incon" 
-            :preview-src-list="[scope.row.incon]">
+            :preview-src-list="[scope.row.incon]"
+            v-if="scope.row.incon">
           </el-image>
         </template>
       </el-table-column>
-      <el-table-column label="书籍名称" prop="name" :show-overflow-tooltip="true" min-width="180" />
+      <el-table-column label="书籍名称" prop="name" :show-overflow-tooltip="true" min-width="180"/>
+      <el-table-column label="书籍排序" prop="sort" :show-overflow-tooltip="true" min-width="180"/>
       <el-table-column label="书籍文件" align="left" prop="incon" min-width="180">
         <template slot-scope="scope">
           <el-link :href="`${scope.row.bookUrl}`" :underline="false" target="_blank" v-if='scope.row.bookUrl'>
@@ -128,9 +130,12 @@
       </el-table-column>
       <el-table-column label="音频文件" align="left" prop="incon" min-width="180">
         <template slot-scope="scope">
-          <el-link :href="`${scope.row.bookAudioUrl}`" :underline="false" target="_blank" v-if='scope.row.bookAudioUrl'>
+          <!-- <el-link :href="`${scope.row.bookAudioUrl}`" :underline="false" target="_blank" v-if='scope.row.bookAudioUrl'>
             <i class='el-icon-headset' style="font-size:30px;cursor:pointer" ></i>
-          </el-link>
+          </el-link> -->
+          <div v-if='scope.row.bookAudioUrl' style="cursor:pointer" @click='getBookAudio(scope.row)'>
+            <i class='el-icon-headset' style="font-size:30px;cursor:pointer" ></i>
+          </div>
           <span v-else>暂未上传</span>
         </template>
       </el-table-column>
@@ -139,21 +144,21 @@
           <span>{{ parseTime(scope.row.createTime) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="180">
+      <el-table-column label="操作" align="left" fixed="right" width="120">
         <template slot-scope="scope">
           <el-button
             size="mini"
             type="text"
             icon="el-icon-edit"
             @click="handleUpdateFile(scope.row)"
-            v-hasPermi="['system:role:edit']"
+            v-hasPermi="['fozu:fozu:edit']"
           >修改</el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDeleteFile(scope.row)"
-            v-hasPermi="['system:role:remove']"
+            v-hasPermi="['fozu:fozu:remove']"
           >删除</el-button>
         </template>
       </el-table-column>
@@ -168,20 +173,23 @@
     />
 
     <!-- 添加或修改佛经 -->
-    <el-dialog title="新增佛祖" :visible.sync="openFile" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
+    <el-dialog title="新增佛经" :visible.sync="openFile" width="500px" append-to-body>
+      <el-form ref="form" :model="form" :rules="rules" label-width="100px" style='max-height:700px;overflow-y:auto'>
         <el-form-item label="书籍名称：" prop="name">
           <el-input v-model="form.name" placeholder="请输入书籍名称" />
         </el-form-item>
+        <el-form-item label="排序：" prop="sort">
+          <el-input v-model="form.sort" placeholder="请输入书籍名称" />
+        </el-form-item>
         <el-form-item label="书籍图片：" prop="incon">
-          <ImageUpload @input='changeImage' :limit='1' :value='imageFileList'></ImageUpload>
+          <ImageUpload @input='changeImage' :limit='1' :fileSize='20' :value='imageFileList'></ImageUpload>
         </el-form-item>
         <el-form-item label="书籍文件：" prop='bookUrl'>
           <FileUpload @input='changeFile' :limit='1' :value='textFileList'></FileUpload>
         </el-form-item>
         <el-form-item label="音频文件：" prop='bookAudioUrl'>
           <!-- <input type="file" @change="uploadAudio" accept="audio/*"> -->
-          <FileUpload @input='changeAudio' :fileType='fileTypeDoc' :fileSize='50' type='audio' :limit='1'  :value='audioFileList'></FileUpload>
+          <FileUpload @input='changeAudio' :fileType='fileTypeDoc' type='audio' :limit='100' :value='audioFileList'></FileUpload>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -283,6 +291,20 @@
         <el-button @click="cancelDataScope">取 消</el-button>
       </div>
     </el-dialog>
+
+    <el-dialog title="音频文件" :visible.sync="openBookAudio" width="500px" append-to-body>
+      <div class='audio-box' style='max-height:500px;overflow-y:aotu'>
+        <div v-for='(item,index) in bookAudioArr' :key='item.newFileName' style='margin-top:10px'>
+          <el-link :href="`${item.url}`" :underline="false" target="_blank" >
+            <span>{{item.newFileName}}</span>
+            <i class='el-icon-headset' style="font-size:30px;cursor:pointer" ></i>
+          </el-link>
+        </div>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="openBookAudio = false">关 闭</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -323,10 +345,12 @@ export default {
       openFile: false,
       // 是否显示弹出层（数据权限）
       openDataScope: false,
+      openBookAudio: false,
       menuExpand: false,
       menuNodeAll: false,
       deptExpand: true,
       deptNodeAll: false,
+      bookAudioArr : [],
       // 日期范围
       dateRange: [],
       // 数据范围选项
@@ -374,7 +398,10 @@ export default {
           { required: true, message: "书籍名称不能为空", trigger: "blur" }
         ],
         incon: [
-          { required: true, message: "书籍图片不能为空", trigger: "blur" }
+          { required: false, message: "书籍图片不能为空", trigger: "blur" }
+        ],
+        sort: [
+          { required: false, message: "请输入排序", trigger: "blur" }
         ],
         bookUrl: [
           { required: true, message: "书籍路径不能为空", trigger: "blur" }
@@ -402,6 +429,19 @@ export default {
     this.getList();
   },
   methods: {
+    getBookAudio(row){
+      this.openBookAudio = true
+      let arr = row.bookAudioUrl.split(',')
+      console.log(arr,'arr')
+      this.bookAudioArr = []
+      for(let i in arr){
+        this.bookAudioArr.push({
+          url:arr[i],
+          newFileName:row.name + (arr.length> 1 ? (Number(i) + 1) : '') + '.'  + arr[i].split('.')[arr[i].split('.').length-1] , 
+          originalFilename:row.name + (arr.length> 1 ? (Number(i) + 1) : '') + '.' + arr[i].split('.')[arr[i].split('.').length-1],
+        })
+      }
+    },
     changeImage(item){
       console.log(item,'itemmmmmmmmm')
       if(item&&item.length){
@@ -421,10 +461,17 @@ export default {
     changeAudio(item){
       console.log(item,'itemmmmmmmmm')
       if(item&&item.length){
-        this.form.bookAudioUrl = item[0].url
+        for(let i in item){
+          if(i == 0){
+            this.form.bookAudioUrl = item[i].url
+          }else{
+            this.form.bookAudioUrl +=   ',' + item[i].url
+          }
+        }
       }else{
         this.form.bookAudioUrl = ''
       }
+      console.log(this.form.bookAudioUrl,'this.form.bookAudioUrl')
     },
     uploadAudio(event) {
       console.log(event,'event')
@@ -658,7 +705,7 @@ export default {
               incon:this.form.incon,
               bookUrl:this.form.bookUrl,
               bookAudioUrl:this.form.bookAudioUrl,
-              sort:'',
+              sort:this.form.sort,
             }
             insertOrUpdate(query).then(response => {
               this.$modal.msgSuccess("新增成功");
@@ -698,11 +745,16 @@ export default {
       }
 
       if(row.bookAudioUrl){
-        this.audioFileList = [{
-          url:row.bookAudioUrl,
-          newFileName:row.name + '.' + row.bookAudioUrl.split('.')[row.bookAudioUrl.split('.').length-1],
-          originalFilename:row.name + '.'  + row.bookAudioUrl.split('.')[row.bookAudioUrl.split('.').length-1],
-        }]
+        let arr = row.bookAudioUrl.split(',')
+        console.log(arr,'arr')
+        this.audioFileList = []
+        for(let i in arr){
+          this.audioFileList.push({
+            url:arr[i],
+            newFileName:row.name + (arr.length> 1 ? (Number(i) + 1) : '') + '.'  + arr[i].split('.')[arr[i].split('.').length-1] , 
+            originalFilename:row.name + (arr.length> 1 ? (Number(i) + 1) : '') + '.' + arr[i].split('.')[arr[i].split('.').length-1],
+          })
+        }
       }
       this.openFile = true
       console.log(this.imageFileList,this.textFileList,this.audioFileList,'this.audioFileList')
@@ -824,3 +876,6 @@ export default {
   }
 };
 </script>
+<style lang="scss" scoped>
+
+</style>

@@ -62,6 +62,11 @@ export const constantRoutes = [
     hidden: true
   },
   {
+    path: '/lookBook',
+    component: () => import('@/views/aiServiceManagement/aiNovelManagement/lookBook'),
+    hidden: true
+  },
+  {
     path: '',
     component: Layout,
     redirect: 'index',

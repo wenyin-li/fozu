@@ -32,6 +32,24 @@
           <span class="el-icon-document"> {{ getFileName(file.originalFilename) }} </span>
         </el-link>
         <div class="ele-upload-list__item-content-action">
+          <el-upload
+            multiple
+            :action="uploadFileUrl"
+            :before-upload="handleBeforeUpload"
+            :file-list="fileList"
+            :limit="limit"
+            :on-error="handleUploadError"
+            :on-exceed="handleExceed"
+            :on-success="handleUploadSuccessChange"
+            :show-file-list="false"
+            :headers="headers"
+            class="upload-file-uploader"
+            ref="fileUpload"
+             style='display:inline'
+          >
+            <!-- <el-button size="small" type="primary">点击上传</el-button> -->
+            <el-link :underline="false" @click="handleEdit(index)" type="info">修改</el-link>
+          </el-upload>
           <el-link :underline="false" @click="handleDelete(index)" type="danger">删除</el-link>
         </div>
       </li>
@@ -55,7 +73,7 @@ export default {
     // 大小限制(MB)
     fileSize: {
       type: Number,
-      default: 5,
+      default: 200,
     },
     // 文件类型, 例如['png', 'jpg', 'jpeg']
     fileType: {
@@ -87,6 +105,7 @@ export default {
         Authorization: "Bearer " + getToken(),
       },
       fileList: this.originFileList,
+      changeIndex:''
     };
   },
   watch: {
@@ -179,6 +198,31 @@ export default {
         this.$refs.fileUpload.handleRemove(file);
         this.uploadedSuccessfully();
       }
+    },
+    // 上传成功回调
+    handleUploadSuccessChange(res, file) {
+      if (res.code === 200) {
+        this.fileList[this.changeIndex] = {
+          name: res.fileName, url: res.fileName,...res
+        }
+        this.fileList = JSON.parse(JSON.stringify(this.fileList))
+        this.$emit("input", this.fileList);
+        this.$modal.closeLoading();
+        // this.uploadedSuccessfully();
+        console.log('修改成功：',this.fileList)
+      } else {
+        this.number--;
+        this.$modal.closeLoading();
+        this.$modal.msgError(res.msg);
+        // this.$refs.fileUpload.handleRemove(file);
+        // this.uploadedSuccessfully();
+      }
+    },
+    //修改文件
+    handleEdit(index){
+      console.log(this.$refs,'reffffffff')
+      this.changeIndex = index
+
     },
     // 删除文件
     handleDelete(index) {
