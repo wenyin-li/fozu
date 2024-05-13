@@ -38,7 +38,7 @@
           </el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="所属app" prop="sourceAppidId">
+      <!-- <el-form-item label="所属app" prop="sourceAppidId">
         <el-select v-model="queryParams.sourceAppidId" placeholder="请选择">
           <el-option
             v-for="item in allPageAppid"
@@ -48,7 +48,7 @@
           >
           </el-option>
         </el-select>
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="创建时间">
         <el-date-picker
           v-model="dateRange"
@@ -108,6 +108,11 @@
         :show-overflow-tooltip="true"
         min-width="120"
       />
+      <el-table-column label="所属app" align="left" prop="sourceType" min-width="100">
+        <template slot-scope="scope">
+          <span>{{ getMpApp(scope.row.mpAppid) }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="来源类型" align="left" prop="sourceType" min-width="100">
         <template slot-scope="scope">
           <span>{{ scope.row.sourceType | filterSourceType }}</span>
@@ -184,6 +189,17 @@
         <el-form-item label="关联id" prop="elementId">
           <el-input v-model="form.elementId" placeholder="请输入关联id" />
         </el-form-item>
+        <!-- <el-form-item label="所属app" prop="sourceAppidId">
+          <el-select v-model="form.sourceAppidId" placeholder="请选择" style='width:100%'>
+            <el-option
+              v-for="item in allPageAppid"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item> -->
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitFormFile">确 定</el-button>
@@ -248,7 +264,7 @@ export default {
         pageNum: 1,
         pageSize: 10,
         sourceType: null,
-        sourceAppidId: "",
+        // sourceAppidId: "",
         typeId: "",
         title: "",
         url: "",
@@ -262,6 +278,7 @@ export default {
         url: [{ required: false, message: "页面或按钮地支不能为空", trigger: "blur" }],
         sourceType: [{ required: true, message: "来源类型不能为空", trigger: "blur" }],
         elementId: [{ required: false, message: "关联id不能为空", trigger: "blur" }],
+        // sourceAppidId: [{ required: true, message: "appid不能为空", trigger: "blur" }],
         typeId: [{ required: true, message: "统计类型不能为空", trigger: "blur" }],
       },
       allCountList: [], //统计类型
@@ -274,6 +291,13 @@ export default {
     this.getListAllCountPageAppid()
   },
   methods: {
+    getMpApp(mpAppid){
+      for(let i in this.allPageAppid){
+        if(this.allPageAppid[i].mpAppid == mpAppid){
+          return this.allPageAppid[i].name
+        }
+      }
+    },
     getListAllCountPageAppid(){
       getListAllCountPageSourceAppid({}).then((response) => {
         console.log(response, "response");
@@ -295,7 +319,16 @@ export default {
       this.form = {};
     },
     handleUpdateFile(row) {
-      this.form = { ...row };
+      this.form = { 
+        ...row,
+      };
+
+      // for(let i in this.allPageAppid){
+      //   if(this.allPageAppid[i].mpAppid == row.mpAppid){
+      //       this.form.sourceAppidId = this.allPageAppid[i].id
+      //   }
+      // }
+
       this.openFile = true;
     },
     submitFormFile: function () {
@@ -307,6 +340,7 @@ export default {
             url: this.form.url,
             id: this.form.id,
             elementId: this.form.elementId,
+            // sourceAppidId: this.form.sourceAppidId,
             typeId: this.form.typeId,
             sourceType: this.form.sourceType,
           };
@@ -333,7 +367,7 @@ export default {
       let data = {
         sourceType: query.sourceType ? query.sourceType : null,
         typeId: query.typeId,
-        sourceAppidId: query.sourceAppidId,
+        // sourceAppidId: query.sourceAppidId,
         title: query.title,
         url: query.url,
         pageNum: query.pageNum,
@@ -359,7 +393,7 @@ export default {
       this.dateRange = [];
       this.queryParams.sourceType = null;
       this.queryParams.typeId = "";
-      this.queryParams.sourceAppidId = "";
+      // this.queryParams.sourceAppidId = "";
       this.queryParams.title = "";
       this.queryParams.url = "";
       this.handleQuery();

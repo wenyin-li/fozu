@@ -19,9 +19,6 @@
       <el-form-item label="渠道" prop="channel">
         <el-input v-model="queryParams.channel" placeholder="请输入渠道"></el-input>
       </el-form-item>
-      <el-form-item label="" prop="channel">
-        <el-input v-model="queryParams.channel" placeholder="请输入渠道"></el-input>
-      </el-form-item>
       <el-form-item label="统计类型" prop="countTypeName">
         <el-select v-model="queryParams.countTypeName" placeholder="请选择" style="width: 100%">
           <el-option
@@ -44,7 +41,7 @@
           </el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="所属app" prop="sourceAppidId">
+      <!-- <el-form-item label="所属app" prop="sourceAppidId">
         <el-select v-model="queryParams.sourceAppidId" placeholder="请选择">
           <el-option
             v-for="item in allPageAppid"
@@ -54,7 +51,7 @@
           >
           </el-option>
         </el-select>
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="创建时间">
         <el-date-picker
           v-model="dateRange"
@@ -210,7 +207,7 @@ export default {
         channel: "",
         title: "",
         url: "",
-        sourceAppidId: "",
+        // sourceAppidId: "",
       },
       // 表单参数
       openFile: false,
@@ -254,7 +251,7 @@ export default {
         channel: query.channel,
         sourceType: query.sourceType ? query.sourceType : null,
         countTypeName: query.countTypeName,
-        sourceAppidId: query.sourceAppidId,
+        // sourceAppidId: query.sourceAppidId,
         title: query.title,
         url: query.url,
         pageNum: query.pageNum,
@@ -282,7 +279,7 @@ export default {
       this.queryParams.channel = "";
       this.queryParams.title = "";
       this.queryParams.url = "";
-      this.queryParams.sourceAppidId = "";
+      // this.queryParams.sourceAppidId = "";
       this.handleQuery();
     },
   },

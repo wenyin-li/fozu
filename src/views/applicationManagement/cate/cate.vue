@@ -64,7 +64,7 @@
 
     <el-table :data="roleList" @selection-change="handleSelectionChange">
       <!-- <el-table-column type="selection" width="55" align="center" /> -->
-      <el-table-column label="分类id" align="left" prop="title" min-width="100">
+      <el-table-column label="分类id" align="left" prop="title" min-width="60">
         <template slot-scope="scope">
           <span>{{ scope.row.id }}</span>
         </template>

@@ -80,6 +80,11 @@
       @selection-change="handleSelectionChange"
     >
       <!-- <el-table-column type="selection" width="55" align="center" /> -->
+      <el-table-column label="分类id" align="left" prop="title" min-width="60">
+        <template slot-scope="scope">
+          <span>{{ scope.row.id }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="标题" align="left" prop="name" min-width="100">
         <template slot-scope="scope">
           <span>{{ scope.row.name }}</span>
